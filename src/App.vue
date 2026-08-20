@@ -46,6 +46,8 @@ const showArchived = ref(false)
 const newColumnTitle = ref('')
 const isColumnFormOpen = ref(false)
 const showActivityHistory = ref(false)
+const storedTheme = localStorage.getItem('taskroom-theme') as 'dark' | 'light' | null
+const theme = ref<'dark' | 'light'>(storedTheme || 'dark')
 const selectedTask = ref<Task | null>(null)
 const isFormOpen = ref(false)
 const isBoardFormOpen = ref(false)
@@ -81,6 +83,7 @@ const totalComments = computed(() => allTasks.value.reduce((total, task) => tota
 watch(boards, (value) => localStorage.setItem('taskroom-workspace', JSON.stringify(value)), { deep: true })
 watch(customColumns, (value) => localStorage.setItem('taskroom-columns', JSON.stringify(value)), { deep: true })
 watch(activities, (value) => localStorage.setItem('taskroom-activities', JSON.stringify(value)), { deep: true })
+watch(theme, (value) => localStorage.setItem('taskroom-theme', value))
 function tasksForColumn(column: string) { return visibleTasks.value.filter((task) => task.column === column) }
 function memberFor(id: number): Member { return members.find((member) => member.id === id) || members[0]! }
 function tagColorFor(task: Task) { return task.tagColor || ({ Pesquisa: '#d9a441', Design: '#6886b2', Desenvolvimento: '#4a9d7b' }[task.tag] || '#e85e46') }
@@ -88,6 +91,7 @@ function columnColorFor(color: string) { return color.startsWith('#') ? undefine
 function showFeedback(message: string) { feedback.value = message; window.clearTimeout(feedbackTimer); feedbackTimer = window.setTimeout(() => { feedback.value = '' }, 2600) }
 function recordActivity(action: string, taskTitle: string, taskId?: number, detail?: string) { activities.value.push({ id: Date.now(), boardId: activeBoard.value.id, actorId: 1, action, taskId, taskTitle, detail, createdAt: new Date().toISOString() }) }
 function relativeTime(date: string) { const minutes = Math.max(0, Math.round((Date.now() - new Date(date).getTime()) / 60000)); return minutes < 1 ? 'agora' : minutes === 1 ? 'ha 1 min' : minutes < 60 ? `ha ${minutes} min` : `ha ${Math.round(minutes / 60)} h` }
+function toggleTheme() { theme.value = theme.value === 'dark' ? 'light' : 'dark' }
 function addTask() { if (!newTask.value.title.trim()) return showFeedback('De um nome da tarefa antes de adicionar.'); const task = { id: Date.now(), title: newTask.value.title.trim(), description: newTask.value.description.trim() || 'Sem descrio', priority: newTask.value.priority, tag: newTask.value.tag.trim() || 'Geral', tagColor: newTask.value.tagColor, column: 'backlog', assigneeId: newTask.value.assigneeId, dueDate: newTask.value.dueDate || undefined, comments: [] }; activeBoard.value.tasks.unshift(task); recordActivity('criou a tarefa', task.title, task.id); newTask.value = { title: '', description: '', priority: 'Media', tag: 'Geral', tagColor: '#e85e46', assigneeId: 1, dueDate: '' }; isFormOpen.value = false; showFeedback('Tarefa adicionada ao quadro.') }
 function addBoard() { if (!newBoardName.value.trim()) return; const board: Board = { id: Date.now(), name: newBoardName.value.trim(), description: 'Novo espaco de colaborao', color: '#6886b2', tasks: [] }; boards.value.push(board); activeBoardId.value = board.id; newBoardName.value = ''; isBoardFormOpen.value = false; showFeedback('Quadro criado.') }
 function deleteTask(id: number) { const task = allTasks.value.find((item) => item.id === id); if (task) recordActivity('excluiu a tarefa', task.title, task.id); activeBoard.value.tasks = activeBoard.value.tasks.filter((task) => task.id !== id); selectedTask.value = null; showFeedback('Tarefa excluida.') }
@@ -101,7 +105,7 @@ function login() { isLoggedIn.value = true; showLogin.value = false; showFeedbac
 </script>
 
 <template>
-  <main class="app-shell">
+  <main :class="['app-shell', { 'light-theme': theme === 'light' }]">
     <aside class="sidebar">
       <div class="brand"><span class="brand-mark">+</span><strong>Taskroom</strong></div>
       <div class="workspace-switcher"><span class="workspace-icon">P</span><div><small>Workspace</small><b>Produto digital</b></div><span>R</span></div>
@@ -111,7 +115,7 @@ function login() { isLoggedIn.value = true; showLogin.value = false; showFeedbac
       <div class="sidebar-bottom"><button class="sync-button" @click="showLogin = true"><span class="sync-dot" :class="{ online: isLoggedIn }"></span><span><b>{{ isLoggedIn ? 'Sincronizado' : 'Modo local' }}</b><small>{{ isLoggedIn ? 'Banco de dados conectado' : 'Entrar para sincronizar' }}</small></span><span>:</span></button><div class="profile"><span class="avatar" style="background:#e85e46">GT</span><span><b>Gusstavo Tucci</b><small>Administrador</small></span><button aria-label="Opes">"""</button></div></div>
     </aside>
     <section class="content">
-      <header class="topbar"><div class="breadcrumbs"><span>Workspace</span><b>/</b><strong>{{ activeBoard.name }}</strong></div><div class="top-actions"><div class="presence"><span class="presence-dot"></span> 4 online</div><div class="member-stack"><span v-for="member in members.slice(0, 3)" :key="member.id" class="avatar mini" :style="{ background: member.color }">{{ member.initials }}</span><button class="avatar add-member" aria-label="Adicionar membros" @click="showMembers = !showMembers">+</button></div><button class="share-button" @click="copyLink">R {{ copied ? 'Copiado' : 'Compartilhar' }}</button></div></header>
+      <header class="topbar"><div class="breadcrumbs"><span>Workspace</span><b>/</b><strong>{{ activeBoard.name }}</strong></div><div class="top-actions"><button class="theme-toggle" :aria-label="theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'" @click="toggleTheme">{{ theme === 'dark' ? 'Modo claro' : 'Modo escuro' }}</button><div class="presence"><span class="presence-dot"></span> 4 online</div><div class="member-stack"><span v-for="member in members.slice(0, 3)" :key="member.id" class="avatar mini" :style="{ background: member.color }">{{ member.initials }}</span><button class="avatar add-member" aria-label="Adicionar membros" @click="showMembers = !showMembers">+</button></div><button class="share-button" @click="copyLink">R {{ copied ? 'Copiado' : 'Compartilhar' }}</button></div></header>
       <div v-if="showMembers" class="members-popover"><strong>Membros do quadro</strong><div v-for="member in members" :key="member.id" class="member-row"><span class="avatar mini" :style="{ background: member.color }">{{ member.initials }}</span><span><b>{{ member.name }}</b><small>{{ member.email }}</small></span><span class="member-check">S</span></div><button class="invite-button" @click="showFeedback('Convite pronto para ser enviado.')">+ Convidar por e-mail</button></div>
       <section class="page-heading"><div><span class="eyebrow">Quadro colaborativo</span><h1>{{ activeBoard.name }} <span class="privacy">R Privado</span></h1><p>{{ activeBoard.description }}</p></div><button class="primary-button" @click="isFormOpen = !isFormOpen"><span>+</span> Nova tarefa</button></section>
       <form v-if="isFormOpen" class="task-form" @submit.prevent="addTask"><input v-model="newTask.title" autofocus placeholder="Nome da tarefa" /><input v-model="newTask.description" placeholder="Descrio breve" /><input v-model="newTask.tag" placeholder="Etiqueta" /><input v-model="newTask.dueDate" type="date" aria-label="Data de entrega" /><label class="color-input">Cor <input v-model="newTask.tagColor" type="color" /></label><select v-model="newTask.priority"><option>Alta</option><option>Media</option><option>Baixa</option></select><select v-model="newTask.assigneeId"><option v-for="member in members" :key="member.id" :value="member.id">{{ member.name }}</option></select><button class="primary-button">Adicionar</button></form>
@@ -182,4 +186,22 @@ function login() { isLoggedIn.value = true; showLogin.value = false; showFeedbac
 .activity-item p b { color: #fff; }
 .activity-item small { color: #8c969b; }
 @media (max-width: 700px) { .activity-strip { align-items: stretch; }.activity-summary small { white-space: normal; }.activity-stat { justify-content: space-between; }.activity-history { padding: 14px; } }
+.theme-toggle { border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: 7px 10px; color: #aeb8ba; background: rgba(255,255,255,.05); font-size: 12px; }
+.theme-toggle:hover { color: #fff; border-color: rgba(232,94,70,.65); }
+.activity-history { min-height: 260px; max-height: 520px; overflow-y: auto; padding: 24px; }
+.activity-history header { margin-bottom: 18px; }
+.activity-history h2 { font-size: 23px; }
+.activity-item { min-height: 64px; padding: 16px 4px; }
+.activity-item p { font-size: 14px; }
+.app-shell.light-theme { color: #273236; background: radial-gradient(circle at 80% -10%, rgba(232,94,70,.13), transparent 28%), #f3f1ec; }
+.light-theme .sidebar { border-color: rgba(39,50,54,.12); background: rgba(255,255,255,.74); }
+.light-theme .topbar, .light-theme .organization-toolbar { border-color: rgba(39,50,54,.12); }
+.light-theme .workspace-switcher, .light-theme .task-card, .light-theme .list-row, .light-theme .activity-history { border-color: rgba(39,50,54,.12); background: rgba(255,255,255,.68); }
+.light-theme .workspace-switcher b, .light-theme .board-nav button, .light-theme .profile b, .light-theme .sync-button b, .light-theme .breadcrumbs strong, .light-theme .page-heading h1, .light-theme .task-card h3, .light-theme .list-row strong, .light-theme .activity-history h2, .light-theme .activity-item p { color: #273236; }
+.light-theme small, .light-theme .breadcrumbs span, .light-theme .breadcrumbs b, .light-theme .eyebrow, .light-theme .column-heading h2, .light-theme .task-card p, .light-theme .activity-stat, .light-theme .activity-history header > span { color: #647276; }
+.light-theme .new-board input, .light-theme .column-actions input, .light-theme .task-form input, .light-theme .task-form select, .light-theme .organization-toolbar select, .light-theme .archive-toggle, .light-theme .view-switcher { border-color: rgba(39,50,54,.16); color: #273236; background: #fff; }
+.light-theme .view-switcher button, .light-theme .archive-toggle { color: #647276; }
+.light-theme .view-switcher button.active, .light-theme .archive-toggle.active { color: #fff; background: #334e68; }
+.light-theme .activity-item { border-color: rgba(39,50,54,.1); }
+@media (max-width: 700px) { .theme-toggle { flex: 1; padding-inline: 6px; font-size: 11px; }.activity-history { min-height: 220px; padding: 18px; } }
 </style>
