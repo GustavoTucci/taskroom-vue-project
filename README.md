@@ -1,42 +1,111 @@
-# first-vue-project
+# Taskroom
 
-This template should help get you started developing with Vue 3 in Vite.
+> Um workspace Kanban leve para transformar ideias em tarefas e acompanhar o
+> progresso do projeto com clareza.
 
-## Recommended IDE Setup
+O Taskroom é uma aplicação web responsiva construída para organizar o trabalho
+em três etapas: **A fazer**, **Em andamento** e **Concluído**. A interface
+combina uma visão rápida do progresso com ações essenciais de gerenciamento,
+sem depender de backend ou autenticação.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Visão geral
 
-## Recommended Browser Setup
+| Item | Detalhe |
+| --- | --- |
+| Tipo | Aplicação web de gerenciamento de tarefas |
+| Interface | Vue 3 com Composition API |
+| Linguagem | TypeScript |
+| Bundler | Vite |
+| Persistência | `localStorage` do navegador |
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Recursos
 
-## Type Support for `.vue` Imports in TS
+- Criar tarefas com título, descrição, etiqueta e prioridade.
+- Reordenar o fluxo de trabalho arrastando tarefas entre as colunas.
+- Pesquisar por título, descrição ou etiqueta.
+- Filtrar por prioridade alta, média ou baixa.
+- Excluir tarefas individualmente.
+- Acompanhar a quantidade de tarefas concluídas.
+- Persistir alterações automaticamente no navegador.
+- Usar o quadro em telas grandes ou dispositivos móveis.
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Stack
 
-## Customize configuration
+- [Vue 3](https://vuejs.org/) para a camada de interface e reatividade.
+- [TypeScript](https://www.typescriptlang.org/) para tipagem estática.
+- [Vite](https://vite.dev/) para desenvolvimento e build de produção.
+- `vue-tsc` para verificação de tipos em arquivos `.vue`.
+- CSS nativo para o layout, responsividade e identidade visual.
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Pré-requisitos
 
-## Project Setup
+- Node.js `22.18+` ou `24.12+`.
+- npm instalado e disponível no terminal.
+
+## Instalação
+
+Clone o repositório, entre na pasta do projeto e instale as dependências:
 
 ```sh
+git clone <url-do-repositorio>
+cd first-vue-project
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+## Desenvolvimento
+
+Inicie o servidor local com hot reload:
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+O Vite exibirá no terminal a URL da aplicação, normalmente
+[`http://localhost:5173`](http://localhost:5173).
+
+## Scripts
+
+| Comando | Finalidade |
+| --- | --- |
+| `npm run dev` | Inicia o servidor de desenvolvimento. |
+| `npm run type-check` | Executa a verificação de tipos do projeto. |
+| `npm run build` | Verifica os tipos e gera o build de produção. |
+| `npm run preview` | Serve localmente o build gerado para conferência. |
+
+## Estrutura do projeto
+
+```text
+first-vue-project/
+├── public/            # Arquivos estáticos públicos
+├── src/
+│   ├── App.vue        # Interface, estado e regras do quadro
+│   └── main.ts        # Inicialização da aplicação Vue
+├── index.html         # Documento HTML de entrada
+├── package.json       # Dependências e scripts
+├── tsconfig*.json     # Configurações do TypeScript
+└── vite.config.ts     # Configuração do Vite
+```
+
+## Persistência de dados
+
+As tarefas são salvas localmente no navegador sob a chave
+`vue-kanban-tasks`. Os dados não são sincronizados entre dispositivos e são
+perdidos quando o armazenamento local do site é removido.
+
+Para começar novamente com as tarefas de exemplo, remova essa chave nas
+ferramentas de desenvolvimento do navegador e recarregue a página.
+
+## Build de produção
+
+Gere os arquivos otimizados para publicação com:
 
 ```sh
 npm run build
+```
+
+O resultado será criado na pasta `dist/`. Para visualizar esse resultado
+localmente antes de publicar:
+
+```sh
+npm run preview
 ```
