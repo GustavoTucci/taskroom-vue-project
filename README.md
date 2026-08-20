@@ -25,6 +25,11 @@ sem depender de backend ou autenticação.
 - Pesquisar por título, descrição ou etiqueta.
 - Filtrar por prioridade alta, média ou baixa.
 - Excluir tarefas individualmente.
+- Alternar entre tema claro e escuro, com preferência persistida.
+- Personalizar a cor de destaque do quadro.
+- Abrir os detalhes de uma tarefa em modal.
+- Arrastar tarefas com mouse, toque e pointer events em dispositivos móveis.
+- Exibir carregamento inicial e mensagens de feedback após ações.
 - Acompanhar a quantidade de tarefas concluídas.
 - Persistir alterações automaticamente no navegador.
 - Usar o quadro em telas grandes ou dispositivos móveis.
